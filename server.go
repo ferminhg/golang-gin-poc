@@ -2,13 +2,31 @@ package main
 
 import (
 	"github.com/ferminhg/golang-gin-poc/infrastructure"
+	"github.com/ferminhg/golang-gin-poc/infrastructure/middleware"
 	"github.com/ferminhg/golang-gin-poc/service"
 	"github.com/gin-gonic/gin"
+	gindump "github.com/tpkeeper/gin-dump"
+	"io"
+	"os"
 )
 
-func main() {
+func serverLogOutput() {
+	f, _ := os.Create("logs/gin.log")
+	gin.DefaultWriter = io.MultiWriter(f, os.Stdout)
+}
 
-	server := gin.Default()
+func main() {
+	serverLogOutput()
+
+	server := gin.New()
+
+	server.Use(
+		gin.Recovery(),
+		middleware.Logger(),
+		gindump.Dump(),
+		middleware.BasicAuth(),
+	)
+
 	adService := service.New()
 	adController := infrastructure.New(adService)
 
