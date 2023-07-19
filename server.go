@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	gindump "github.com/tpkeeper/gin-dump"
 	"io"
+	"net/http"
 	"os"
 )
 
@@ -41,7 +42,12 @@ func main() {
 	})
 
 	server.POST("/ads", func(context *gin.Context) {
-		context.JSON(200, adController.Save(context))
+		err := adController.Save(context)
+		if err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		context.JSON(http.StatusOK, gin.H{"message": "Ad is valid 🎊"})
 	})
 
 	server.Run(":8080")
